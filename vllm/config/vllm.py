@@ -1276,6 +1276,10 @@ class VllmConfig:
                     "DP+EP generation accuracy."
                 )
                 self.scheduler_config.async_scheduling = False
+            elif self.parallel_config.pipeline_parallel_size > 1 and not getattr(
+                self, "use_v2_model_runner", False
+            ):
+                self.scheduler_config.async_scheduling = False
             else:
                 self.scheduler_config.async_scheduling = True
 
