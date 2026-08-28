@@ -156,7 +156,8 @@ class SharedExperts(torch.nn.Module):
         return dbo_current_ubatch_id() if self.enable_dbo else 0
 
     @property
-    def output(self) -> torch.Tensor | None:
+    def output(self) -> torch.Tensor:
+        assert self._output[self._output_idx] is not None
         output = self._output[self._output_idx]
         self._output[self._output_idx] = None
         return output
@@ -171,11 +172,15 @@ class SharedExperts(torch.nn.Module):
         if order != experts_order:
             return None
 
+        assert self._output[self._output_idx] is None
+
         if order == SharedExpertsOrder.MULTI_STREAM_OVERLAPPED:
             self._output[self._output_idx] = self._run_in_aux_stream(
                 shared_experts_input
             )
         else:
             self._output[self._output_idx] = self._layer(shared_experts_input)
+
+        assert self._output[self._output_idx] is not None
 
         return None
